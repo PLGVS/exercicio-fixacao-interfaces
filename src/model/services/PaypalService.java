@@ -3,8 +3,12 @@ package model.services;
 public class PaypalService implements PaymentService{
 
     @Override
-    public double payment(double value, int installmentQuantity, int installmentNumber){
-        double baseValue = (value/installmentQuantity) + ((value/installmentQuantity) * (0.01 * installmentNumber));
-        return baseValue + (baseValue * 0.02);
+    public double paymentFee(double amount) {
+        return amount * 0.02;
+    }
+
+    @Override
+    public double interest(double amount, int months) {
+        return amount * (0.01 * months);
     }
 }

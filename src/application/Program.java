@@ -2,10 +2,14 @@ package application;
 
 import model.entities.Contract;
 import model.entities.Installment;
+import model.services.ContractService;
 import model.services.PaypalService;
+
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -16,27 +20,29 @@ public class Program {
         Locale.setDefault(Locale.US);
         Scanner sc = new Scanner(System.in);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        try {
-            System.out.println("Entre os dados do contrato: ");
-            System.out.print("Numero: ");
-            int number = sc.nextInt();
-            System.out.print("Data (dd/MM/yyyy): ");
-            Date date = sdf.parse(sc.next());
-            System.out.print("Valor do contrato: ");
-            double value = sc.nextDouble();
-            System.out.print("Entre com o número de parcelas: ");
-            int installmentQuantity = sc.nextInt();
+        DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-            Contract c = new Contract(number, date, value, installmentQuantity, new PaypalService());
+        System.out.println("Entre os dados do contrato: ");
+        System.out.print("Numero: ");
+        int number = sc.nextInt();
+        System.out.print("Data (dd/MM/yyyy): ");
+        LocalDate date = LocalDate.parse(sc.next(), fmt);
+        System.out.print("Valor do contrato: ");
+        double totalValue = sc.nextDouble();
 
-            for (Installment i : c.getInstallmentList()){
-                System.out.println(sdf.format(i.getDueDate()) + " - " + i.getAmount());
-            }
+        Contract obj = new Contract(number, date, totalValue);
 
+        System.out.print("Entre com o número de parcelas: ");
+        int n = sc.nextInt();
+
+        ContractService contractService = new ContractService(new PaypalService());
+
+        contractService.processContract(obj, n);
+
+        System.out.println("Parcelas:");
+        for (Installment installment : obj.getInstallments()){
+            System.out.println(installment);
         }
-        catch (ParseException e){
-            System.out.println("Invalid date format");
-        }
+        sc.close();
     }
 }
